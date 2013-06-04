@@ -20,7 +20,7 @@ namespace lens
 {
     class ICCamera : public ICamera
 	{
-	  Q_OBJECT
+	  
 
     private:
       //DShowLib::Grabber        m_grabber; // The instance of the Grabber class.

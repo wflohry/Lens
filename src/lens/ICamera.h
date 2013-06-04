@@ -17,15 +17,13 @@ Revision Log:
 #include <cv.h>
 #include <highgui.h>
 
-#include <QObject>
-
 namespace lens
 {
-  class ICamera : public QObject
+  class ICamera
   {
-	Q_OBJECT
+	
 
-  public slots:
+  public:
 	virtual bool	  open(void)      = 0;
 	virtual bool	  close(void)	  = 0;
 	virtual int		  getWidth(void)  = 0;

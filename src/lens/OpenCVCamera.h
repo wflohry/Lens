@@ -20,7 +20,7 @@ namespace lens
 {
 	class OpenCVCamera : public ICamera
 	{
-	  Q_OBJECT
+	  
 
 	private:
 	  shared_ptr<CvCapture> m_capture;
@@ -29,7 +29,7 @@ namespace lens
 	  OpenCVCamera();
 	  static std::string cameraName(void);
 
-	public slots:
+	public:
 	  bool		open(void);
 	  bool		close(void);
 	  int		getWidth(void);

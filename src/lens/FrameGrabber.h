@@ -23,7 +23,7 @@ namespace lens
   // Can't make this private otherwise QT MOC cannot compile it :(
   class FrameGrabberWorker : public QObject
   {
-	Q_OBJECT
+	
 	friend class FrameGrabber;
 
   private:
@@ -43,7 +43,7 @@ namespace lens
 
   class FrameGrabber : public QObject
   {
-	Q_OBJECT
+	
 
   private:
 	QThread*			m_frameGrabberThread;

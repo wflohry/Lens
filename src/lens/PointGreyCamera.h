@@ -28,7 +28,7 @@ namespace lens
 {
   class PointGreyCamera : public ICamera
   {
-	Q_OBJECT
+	
 
   private:
 	//	Constants used by PointGrey to specify registers and
@@ -53,7 +53,7 @@ namespace lens
 
 	static string cameraName(void);
 
-  public slots:
+  public:
 	bool	  open(void);
 	bool	  close(void);
 	int		  getWidth(void);

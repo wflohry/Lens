@@ -26,7 +26,7 @@ namespace lens
 {
     class JAICamera : public ICamera
 	{
-	  Q_OBJECT
+	  
 
 	private:
 		FACTORY_HANDLE	m_factory; // Factory Handle

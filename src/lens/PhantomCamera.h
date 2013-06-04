@@ -24,7 +24,7 @@ namespace lens
 {
     class PhantomCamera : public ICamera
 	{
-	Q_OBJECT
+	
 	
 	private:
 		IplImage*		m_cameraImage;

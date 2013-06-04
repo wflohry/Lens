@@ -26,7 +26,7 @@ namespace lens
 {
   class FileCamera : public ICamera
   {
-	Q_OBJECT
+	
 	friend class FileCameraWorker;
 
   private:

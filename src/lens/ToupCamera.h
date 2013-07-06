@@ -11,41 +11,47 @@ Date Created:	2013-06-01
 #include <memory>
 #include "ICamera.h"
 #include "toupcam.h"
+#include <functional>
+#include <mutex>
 
 using namespace std;
+
+class cvTripleBuffer {
+	public:
+		std::mutex mutex;
+		cv::Mat write;
+		cv::Mat read;
+		void swapWrite(){cv::Mat temp = write; write = middle; middle = temp;};
+		void swapRead(){cv::Mat temp = read; read = middle; middle = read;};
+	private:
+		cv::Mat middle;
+};
 
 namespace lens
 {
 	class ToupCamera : public ICamera
 	{
 	private:
-		static void					StaticDataCallback(const void* pData, const BITMAPINFOHEADER* pHeader, BOOL bStill, void* pCtx);
-		void						addFrame(const void* pData, const BITMAPINFOHEADER* pHeader, BOOL bStill);
-		shared_ptr<HToupCam>		m_camera;
-		cv::Mat			m_convertedImage;
-		wchar_t						id[64];
-		long						frameCounter;
-		int							width, height;
-		bool						async;
-		ULONG						resolutionIndex;
+		void					addFrame(const void* pData, const BITMAPINFOHEADER* pHeader, BOOL bStill, void* pCallbackCtx = nullptr);
+		static void				staticCallback(const void* pData, const BITMAPINFOHEADER* pHeader, BOOL bStill, void* pCallbackCtx){((ToupCamera*) pCallbackCtx)->addFrame(pData, pHeader, bStill);};
+		int width, height;
+		shared_ptr<HToupCam>	m_camera;
+		ULONG					resIndex; // resolution index, 0 is highest
+		bool					mFrameReady;
+		cvTripleBuffer			mTripleBuffer;
 	public:
-		ToupCamera(const wchar_t *serialNumber = nullptr);
-
-		bool						open(void);
-		bool						close(void);
-		int							getWidth(void);
-		int							getHeight(void);
-		IplImage*					getFrame(void);
-		cv::Mat						getFrameMat(void);
-		bool						captureAsync(void);
-		
-		/**
-		* Sets the serial number of the camera to use. This function must be called
-		* before connecting and powering up the camera: i.e. open() as it is used
-		* to specify which camera should be loaded
-		*/
-		void		setSerialNumber(const wchar_t *serialNumber);
+		//If camera is 0, return first camera, 1 returns second, etc.
+		ToupCamera(int camera = 0);
+		bool		open(void);
+		bool		close(void) {return false;};
+		int			getWidth(void){return width;};
+		int			getHeight(void){return height;};
+		IplImage*	getFrame(void){return nullptr;};
+		bool		snap(void);
+		const bool	frameReady(void){return mFrameReady;};
+		cv::Mat		getFrameMat(void);
 	};
+
 }
 
 #endif

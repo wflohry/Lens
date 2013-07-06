@@ -40,8 +40,8 @@ namespace lens
 		bool					mFrameReady;
 		cvTripleBuffer			mTripleBuffer;
 	public:
-		//If camera is 0, return first camera, 1 returns second, etc.
-		ToupCamera(int camera = 0);
+		//Initialize camera with pointer to serial
+		ToupCamera(const wchar_t *serialNumber = nullptr);
 		bool		open(void);
 		bool		close(void) {return false;};
 		int			getWidth(void){return width;};

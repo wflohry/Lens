@@ -5,14 +5,20 @@
 using namespace lens;
 
 
-ToupCamera::ToupCamera(int camera) : width(0), height(0), resIndex(1), mFrameReady(false){
-	ToupcamInst ti[TOUPCAM_MAX];
-	unsigned cnt = Toupcam_Enum(ti);
-	if (cnt && camera >= 0 && camera < cnt){
-		m_camera = make_shared<HToupCam>(Toupcam_Open(ti[camera].id));
-		auto x = ti[camera].id;
-		x++;
-		open();
+ToupCamera::ToupCamera(const wchar_t *serialNumber) : width(0), height(0), resIndex(1), mFrameReady(false){
+	if (serialNumber){
+		//TODO: create deletion function
+		m_camera = make_shared<HToupCam> (Toupcam_Open(serialNumber));
+	} else {
+		//Get list of cameras and see if there is an available camera
+		ToupcamInst ti[TOUPCAM_MAX];
+		unsigned cnt = Toupcam_Enum(ti);
+		if (cnt && camera >= 0 && camera < cnt){
+			m_camera = make_shared<HToupCam>(Toupcam_Open(ti[camera].id));
+			auto x = ti[camera].id;
+			x++;
+			open();
+		}
 	}
 }
 

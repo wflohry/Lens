@@ -9,11 +9,14 @@ ToupCamera::ToupCamera(const wchar_t *serialNumber) : width(0), height(0), resIn
 	if (serialNumber){
 		//TODO: create deletion function
 		m_camera = make_shared<HToupCam> (Toupcam_Open(serialNumber));
+		open();
 	} else {
 		//Get list of cameras and see if there is an available camera
 		ToupcamInst ti[TOUPCAM_MAX];
 		unsigned cnt = Toupcam_Enum(ti);
-		if (cnt && camera >= 0 && camera < cnt){
+		//if (cnt && camera >= 0 && camera < cnt){
+		if (cnt >= 0){
+			int camera = 0;
 			m_camera = make_shared<HToupCam>(Toupcam_Open(ti[camera].id));
 			auto x = ti[camera].id;
 			x++;
@@ -32,7 +35,7 @@ bool ToupCamera::open(){
 	height = longHeight;
 
 	//Exposure
-	Toupcam_put_ExpoAGain(*m_camera, 300);
+	Toupcam_put_ExpoAGain(*m_camera, 200);
 	Toupcam_put_AutoExpoEnable(*m_camera, false);
 	Toupcam_put_ExpoTime(*m_camera, 50000);
 
@@ -67,13 +70,13 @@ void ToupCamera::addFrame(const void* pData, const BITMAPINFOHEADER* pHeader, BO
 }
 
 cv::Mat ToupCamera::getFrameMat(void){
-	if (!mFrameReady) return cv::Mat(0,0,0);
 	mTripleBuffer.mutex.lock();
+	if (!mFrameReady) return cv::Mat(0,0,0);
 	mFrameReady = false;
 	mTripleBuffer.swapRead();
 	mTripleBuffer.mutex.unlock();
 
-	return mTripleBuffer.write;
+	return mTripleBuffer.read;
 }
 
 bool ToupCamera::snap(void)
@@ -81,3 +84,7 @@ bool ToupCamera::snap(void)
 	HRESULT snapped = Toupcam_Snap(*m_camera, resIndex);
 	return SUCCEEDED(snapped);
 }
+
+void ToupCamera::exposureSet(unsigned long exposureMicroseconds) {
+	HRESULT success = Toupcam_put_ExpoTime(*m_camera, exposureMicroseconds);
+};

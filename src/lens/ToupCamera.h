@@ -42,14 +42,22 @@ namespace lens
 	public:
 		//Initialize camera with pointer to serial
 		ToupCamera(const wchar_t *serialNumber = nullptr);
-		bool		open(void);
-		bool		close(void) {return false;};
-		int			getWidth(void){return width;};
-		int			getHeight(void){return height;};
-		IplImage*	getFrame(void){return nullptr;};
-		bool		snap(void);
-		const bool	frameReady(void){return mFrameReady;};
-		cv::Mat		getFrameMat(void);
+		bool				open(void);
+		bool				close(void) {return false;};
+		int					getWidth(void){return width;};
+		int					getHeight(void){return height;};
+		IplImage*			getFrame(void){return nullptr;};
+		bool				snap(void);
+		const bool			frameReady(void){return mFrameReady;};
+		cv::Mat				getFrameMat(void);
+		const std::string	getSerialNumber(void);
+
+		void				exposureAutoSet(bool enable) {Toupcam_put_AutoExpoEnable(*m_camera, enable);};
+		void				exposureSet(unsigned long exposureMicroseconds);
+		void				exposureGainSet(unsigned short gain){Toupcam_put_ExpoAGain(*m_camera, gain);};
+		const unsigned short exposureGainGet() {unsigned short gain; Toupcam_get_ExpoAGain(*m_camera, &gain); return gain;};
+		const unsigned long	exposureGet(void) {unsigned long time; Toupcam_get_ExpoTime(*m_camera, &time); return time;};
+		//void				exposureMatch(const lens::ToupCamera *otherCamera);
 	};
 
 }

@@ -4,25 +4,45 @@
 
 using namespace lens;
 
+ToupCamera::ToupCamera(std::string serialNumber) : width(0), height(0), resIndex(1), mFrameReady(false){
+	ToupcamInst ti[TOUPCAM_MAX];
+	unsigned cnt = Toupcam_Enum(ti);
+	if (cnt <= 0) return;
 
-ToupCamera::ToupCamera(const wchar_t *serialNumber) : width(0), height(0), resIndex(1), mFrameReady(false){
-	if (serialNumber){
+	if (serialNumber.size() == 31){
 		//TODO: create deletion function
-		m_camera = make_shared<HToupCam> (Toupcam_Open(serialNumber));
-		open();
-	} else {
-		//Get list of cameras and see if there is an available camera
-		ToupcamInst ti[TOUPCAM_MAX];
-		unsigned cnt = Toupcam_Enum(ti);
-		//if (cnt && camera >= 0 && camera < cnt){
-		if (cnt >= 0){
-			int camera = 0;
-			m_camera = make_shared<HToupCam>(Toupcam_Open(ti[camera].id));
-			auto x = ti[camera].id;
-			x++;
-			open();
+		char sn[32];
+		for (int i = 0; i < cnt; i++){
+			m_camera = make_shared<HToupCam>(Toupcam_Open(ti[i].id));
+			Toupcam_get_SerialNumber(*m_camera, sn);
+			if (serialNumber == std::string(sn)){
+				open();
+				break; //correct camera!
+			} else (Toupcam_Close(*m_camera));
 		}
+	} else {
+		//open first available camera
+		m_camera = make_shared<HToupCam>(Toupcam_Open(ti[0].id));
+		open();
 	}
+	
+}
+
+
+lens::ToupCamera::ToupCamera( int cameraID )
+{
+	ToupcamInst ti[TOUPCAM_MAX];
+	unsigned cnt = Toupcam_Enum(ti);
+	if (cnt < cameraID + 1) return;
+
+	m_camera = make_shared<HToupCam>(Toupcam_Open(ti[cameraID].id));
+	open();
+}
+
+
+lens::ToupCamera::~ToupCamera()
+{
+	Toupcam_Close(*m_camera);
 }
 
 bool ToupCamera::open(){
@@ -70,8 +90,8 @@ void ToupCamera::addFrame(const void* pData, const BITMAPINFOHEADER* pHeader, BO
 }
 
 cv::Mat ToupCamera::getFrameMat(void){
-	mTripleBuffer.mutex.lock();
 	if (!mFrameReady) return cv::Mat(0,0,0);
+	mTripleBuffer.mutex.try_lock();
 	mFrameReady = false;
 	mTripleBuffer.swapRead();
 	mTripleBuffer.mutex.unlock();
@@ -88,3 +108,13 @@ bool ToupCamera::snap(void)
 void ToupCamera::exposureSet(unsigned long exposureMicroseconds) {
 	HRESULT success = Toupcam_put_ExpoTime(*m_camera, exposureMicroseconds);
 };
+
+const std::string lens::ToupCamera::getSerialNumber( void )
+{
+	char sn[32];
+	Toupcam_get_SerialNumber(*m_camera, sn);
+	std::string mOutput(sn);
+	return mOutput;
+}
+
+

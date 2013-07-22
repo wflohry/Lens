@@ -13,6 +13,7 @@ Date Created:	2013-06-01
 #include "toupcam.h"
 #include <functional>
 #include <mutex>
+#include <atomic>
 
 using namespace std;
 
@@ -22,7 +23,7 @@ class cvTripleBuffer {
 		cv::Mat write;
 		cv::Mat read;
 		void swapWrite(){cv::Mat temp = write; write = middle; middle = temp;};
-		void swapRead(){cv::Mat temp = read; read = middle; middle = read;};
+		void swapRead(){cv::Mat temp = read; read = middle; middle = temp;};
 	private:
 		cv::Mat middle;
 };
@@ -41,7 +42,10 @@ namespace lens
 		cvTripleBuffer			mTripleBuffer;
 	public:
 		//Initialize camera with pointer to serial
-		ToupCamera(const wchar_t *serialNumber = nullptr);
+		ToupCamera(std::string serialNumber);
+		ToupCamera(int cameraID);
+		ToupCamera(){};
+		~ToupCamera();
 		bool				open(void);
 		bool				close(void) {return false;};
 		int					getWidth(void){return width;};
@@ -57,7 +61,6 @@ namespace lens
 		void				exposureGainSet(unsigned short gain){Toupcam_put_ExpoAGain(*m_camera, gain);};
 		const unsigned short exposureGainGet() {unsigned short gain; Toupcam_get_ExpoAGain(*m_camera, &gain); return gain;};
 		const unsigned long	exposureGet(void) {unsigned long time; Toupcam_get_ExpoTime(*m_camera, &time); return time;};
-		//void				exposureMatch(const lens::ToupCamera *otherCamera);
 	};
 
 }
